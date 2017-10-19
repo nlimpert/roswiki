@@ -209,10 +209,10 @@ def get_badges(macro, data):
     elif data.get('devel_jobs', []):
         badges.append({'text' : 'Continuous integration', 'color' : color, 'icon' : icon})
     if data.get('doc_job', None):
-        badges.append(['Documented', color, icon])
+        badges.append({'text' : 'Documented', 'color' : color, 'icon' : icon})
 
     if not data.get('doc_job', None):
-        badges.append(['No API documentation', 'b94a48', 'remove'])
+        badges.append({'text' : 'No API documentation', 'color' : 'b94a48', 'icon' : 'remove'})
 
     if badges:
         html += p(1)
