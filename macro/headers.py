@@ -177,9 +177,37 @@ def get_badges(macro, data):
     color = '5cb85c'
     icon = 'ok'
     if data.get('release_jobs', []):
-        badges.append(['Released', color, icon])
-    if data.get('devel_jobs', []):
-        badges.append(['Continuous integration', color, icon])
+        badges.append({'text' : 'Released', 'color' : color, 'icon' : icon})
+    if data.get('tests', []):
+        tests = data.get("tests",[])
+        if tests["aggregated_status"] == "stable":
+            cur_color = '5cb85c'
+            cur_icon = 'ok'
+        elif tests["aggregated_status"] == "unstable":
+            cur_color = 'b94a48'
+            cur_icon = 'remove'
+        else:
+            cur_color = 'b9b948'
+            cur_icon = 'minus'
+
+        cur_map = dict()
+        cur_map['color'] = cur_color;
+        cur_map['text'] = 'Continuous integration'
+        cur_map['icon'] = cur_icon
+
+        if 'history' in tests:
+           cur_map['history'] = tests["history"]
+        if 'results_latest_build' in tests:
+           results_latest_build = tests["results_latest_build"]
+           sum_builds = results_latest_build["skipped"] + results_latest_build["failed"] + results_latest_build["succeeded"]
+           num_succeeded = results_latest_build["succeeded"]
+           cur_map['num_succeeded'] = num_succeeded
+           cur_map['sum_builds'] = sum_builds
+
+        badges.append(cur_map)
+
+    elif data.get('devel_jobs', []):
+        badges.append({'text' : 'Continuous integration', 'color' : color, 'icon' : icon})
     if data.get('doc_job', None):
         badges.append(['Documented', color, icon])
 
