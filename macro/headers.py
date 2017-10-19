@@ -216,11 +216,52 @@ def get_badges(macro, data):
 
     if badges:
         html += p(1)
-        html += '\n'.join([
-            '<span class="badge" style="background-color: #%s;">'
-            '<span class="glyphicon glyphicon-%s" style="color: white;"></span> '
-            '%s</span>' % (badge[1], badge[2], badge[0]) for badge in badges
-        ])
+
+        for badge in badges:
+           if len(badge) > 3:
+
+              html += '\n'.join([
+                 '<div class="dropdown" style="display: inline-block; height: 28px">'
+                 '<button class="badge dropdown-toggle" style="background-color: #%s; height: 28px" data-toggle="dropdown"><span class="glyphicon glyphicon-%s" style="color: white;"></span> %s ' % (badge["color"], badge["icon"], badge["text"])
+              ])
+              if 'num_succeeded' in badge and badge["num_succeeded"] is not None:
+                 html += '\n'.join([
+                    '<span class="badge">%s / %s</span>' % (badge["num_succeeded"], badge["sum_builds"])
+                    ])
+
+              if 'history' in badge and badge["history"] is not None and len(badge['history']) > 0:
+                 html += '\n'.join([
+                    '<span class="caret"></span></button>'
+                    '<p class="dropdown-menu">Tests:</p><ul class="dropdown-menu">'
+                    ])
+                 for buildtest in badge["history"]:
+                    sum_builds = buildtest["tests"]["skipped"] + buildtest["tests"]["failed"] + buildtest["tests"]["succeeded"]
+                    num_succeeded = buildtest["tests"]["succeeded"]
+                    num_failed = buildtest["tests"]["failed"]
+
+                    icon = "ok"
+                    if num_failed > 0:
+                      icon = "minus"
+                      if num_succeeded > 0:
+                         icon = "remove"
+
+                    html += '\n'.join([
+                      '<li><a href="%s">#%s <span class="glyphicon glyphicon-%s"></span></a></li>' % (buildtest["uri"], buildtest["job_id"], icon)
+                       ])
+
+                 html += '\n'.join([
+                    '</ul>'
+                    ])
+              html += '\n'.join([
+                 '</div>'
+                 ])
+           else:
+              html += '\n'.join([
+                 '<div class="dropdown" style="display: inline-block; height: 28px">'
+                 '<button class="badge dropdown-toggle" style="background-color: #%s; height: 28px" data-toggle="dropdown"><span class="glyphicon glyphicon-%s" style="color: white;"></span> %s '
+                 '</button>'
+                 '</div>' % (badge["color"], badge["icon"], badge["text"])
+              ])
         html += p(0)
 
     return html
