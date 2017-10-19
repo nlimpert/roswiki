@@ -18,6 +18,8 @@ distro_names_buildfarm = ['indigo', 'jade', 'kinetic', 'lunar']
 doc_url = "http://docs.ros.org/"
 
 doc_path = '/home/rosbot/docs/'
+devel_path = '/home/rosbot/devel_jobs/'
+
 metrics_path = '/var/www/www.ros.org/metrics/'
 
 MISSING_DOC_TMPL = 'Cannot load information on <strong>%(name)s</strong>, which means that it is not yet in our index.'
@@ -45,6 +47,15 @@ def package_manifest_file(package, distro=None):
         return os.path.join(doc_path, distro, 'api', package, "manifest.yaml")
     else:
         return os.path.join(doc_path, 'api', package, "manifest.yaml")
+
+def package_devel_jobs_file(package, distro=None):
+    """
+    Generate filesystem path to devel_jobs.yaml for package
+    """
+    if distro:
+        return os.path.join(devel_path, distro, 'api', package, "devel_jobs.yaml")
+    else:
+        return os.path.join(devel_path, 'api', package, "devel_jobs.yaml")
 
 def get_package_versions(package):
     distros = []
@@ -211,7 +222,15 @@ def load_package_manifest(package_name, distro=None):
     @return: manifest properties dictionary
     @raise UtilException: if unable to load. Text of error message is human-readable
     """
-    return _load_manifest_file(package_manifest_file(package_name, distro), package_name, "package")
+    manifest_data =    _load_manifest_file(package_manifest_file(package_name, distro), package_name, "package")
+    # append devel_jobs information to manifest_data in case it is available
+    try:
+        devel_jobs_data =  _load_manifest_file(package_devel_jobs_file(package_name, distro), package_name, "package")
+        retval = yaml.load(yaml.dump(manifest_data) + yaml.dump(devel_jobs_data))
+    except UtilException:
+        retval = manifest_data
+
+    return retval
 
 def load_repo_manifest(repo_name):
     """
